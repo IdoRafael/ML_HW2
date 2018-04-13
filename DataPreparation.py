@@ -6,6 +6,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+
 import os
 
 
@@ -91,7 +93,14 @@ def impute(dataframe, f, value):
 
 
 def handle_scaling(train, validate, test):
-    return
+    # TODO improve - currently uses standard distribution scaler, only using train data.
+    # TODO Pay attention to bonus assignment - asks to first use ALL data, then compare to only train
+    scaler = StandardScaler()
+    scaler.fit(train)
+
+    train[:] = scaler.transform(train)
+    validate[:] = scaler.transform(validate)
+    test[:] = scaler.transform(test)
 
 
 def handle_feature_selection(train, validate, test):
