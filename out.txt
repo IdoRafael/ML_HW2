@@ -1,0 +1,466 @@
+========
+Vote:
+count       10000
+unique         11
+top       Purples
+freq         2550
+Name: Vote, dtype: object
+[('Purples', 2550), ('Browns', 1718), ('Greens', 1068)]
+========
+
+========
+Occupation_Satisfaction:
+count    9824.000000
+mean        5.547129
+std         2.880535
+min         1.000000
+25%         3.000000
+50%         6.000000
+75%         8.000000
+max        10.000000
+Name: Occupation_Satisfaction, dtype: float64
+[(10.0, 1033), (9.0, 998), (4.0, 995)]
+========
+
+========
+Avg_monthly_expense_when_under_age_21:
+count    9779.000000
+mean      568.567142
+std       490.487077
+min      -846.416985
+25%       209.274831
+50%       414.793629
+75%       807.226758
+max      2304.032412
+Name: Avg_monthly_expense_when_under_age_21, dtype: float64
+========
+
+========
+AVG_lottary_expanses:
+count      9798.000000
+mean      77152.758675
+std       79476.159477
+min     -142767.739219
+25%       26091.057474
+50%       52325.788765
+75%       96601.546659
+max      553684.728384
+Name: AVG_lottary_expanses, dtype: float64
+========
+
+========
+Most_Important_Issue:
+count           9935
+unique             8
+top       Healthcare
+freq            1763
+Name: Most_Important_Issue, dtype: object
+[('Healthcare', 1763), ('Environment', 1733), ('Social', 1714)]
+========
+
+========
+Avg_Satisfaction_with_previous_vote:
+count    9799.000000
+mean      189.347170
+std       163.626081
+min      -282.138995
+25%        69.526833
+50%       138.073497
+75%       269.075586
+max       768.010804
+Name: Avg_Satisfaction_with_previous_vote, dtype: float64
+========
+
+========
+Looking_at_poles_results:
+count     9924
+unique       2
+top         No
+freq      7945
+Name: Looking_at_poles_results, dtype: object
+[('No', 7945), ('Yes', 1979), (nan, 76)]
+========
+
+========
+Garden_sqr_meter_per_person_in_residancy_area:
+count    9821.000000
+mean      409.091973
+std       128.424408
+min         0.599063
+25%       317.109810
+50%       404.144665
+75%       482.458595
+max       796.010547
+Name: Garden_sqr_meter_per_person_in_residancy_area, dtype: float64
+========
+
+========
+Married:
+count     9934
+unique       2
+top        Yes
+freq      8043
+Name: Married, dtype: object
+[('Yes', 8043), ('No', 1891), (nan, 66)]
+========
+
+========
+Gender:
+count     9915
+unique       2
+top       Male
+freq      5029
+Name: Gender, dtype: object
+[('Male', 5029), ('Female', 4886), (nan, 85)]
+========
+
+========
+Voting_Time:
+count            9923
+unique              2
+top       After_16:00
+freq             5061
+Name: Voting_Time, dtype: object
+[('After_16:00', 5061), ('By_16:00', 4862), (nan, 77)]
+========
+
+========
+Financial_balance_score_(0-1):
+count    9800.000000
+mean        0.500742
+std         0.287984
+min         0.000148
+25%         0.251743
+50%         0.499732
+75%         0.749143
+max         0.999858
+Name: Financial_balance_score_(0-1), dtype: float64
+========
+
+========
+%Of_Household_Income:
+count    9803.000000
+mean        0.498258
+std         0.288513
+min         0.000117
+25%         0.247683
+50%         0.493688
+75%         0.748863
+max         0.999947
+Name: %Of_Household_Income, dtype: float64
+========
+
+========
+Avg_government_satisfaction:
+count    9794.000000
+mean        4.996891
+std         2.886672
+min         0.000019
+25%         2.508883
+50%         4.991964
+75%         7.477996
+max         9.998697
+Name: Avg_government_satisfaction, dtype: float64
+========
+
+========
+Avg_education_importance:
+count    9818.000000
+mean        5.011635
+std         2.886772
+min         0.000167
+25%         2.493905
+50%         5.024107
+75%         7.491928
+max         9.998638
+Name: Avg_education_importance, dtype: float64
+========
+
+========
+Avg_environmental_importance:
+count    9811.000000
+mean        4.995795
+std         2.893535
+min         0.000480
+25%         2.518723
+50%         5.011195
+75%         7.468959
+max         9.999438
+Name: Avg_environmental_importance, dtype: float64
+========
+
+========
+Avg_Residancy_Altitude:
+count    9825.000000
+mean        4.995039
+std         2.879123
+min         0.000259
+25%         2.490497
+50%         4.992213
+75%         7.485880
+max         9.998810
+Name: Avg_Residancy_Altitude, dtype: float64
+========
+
+========
+Yearly_ExpensesK:
+count     9818.000000
+mean      6508.410878
+std       2005.714338
+min       3000.000000
+25%       4780.000000
+50%       6477.000000
+75%       8254.750000
+max      10000.000000
+Name: Yearly_ExpensesK, dtype: float64
+========
+
+========
+%Time_invested_in_work:
+count    9806.000000
+mean       49.812211
+std        29.111983
+min         0.016036
+25%        24.564122
+50%        49.373768
+75%        75.340798
+max        99.990426
+Name: %Time_invested_in_work, dtype: float64
+========
+
+========
+Yearly_IncomeK:
+count    9799.000000
+mean      435.023034
+std       104.551188
+min         0.177641
+25%       381.374576
+50%       430.880575
+75%       488.252843
+max       748.519696
+Name: Yearly_IncomeK, dtype: float64
+========
+
+========
+Avg_monthly_expense_on_pets_or_plants:
+count    9825.000000
+mean     4959.138974
+std      1362.926372
+min        86.517378
+25%      4010.443662
+50%      4875.578514
+75%      5695.373464
+max      9143.110603
+Name: Avg_monthly_expense_on_pets_or_plants, dtype: float64
+========
+
+========
+Avg_monthly_household_cost:
+count     9814.000000
+mean     52736.760294
+std       9960.678315
+min       6596.234697
+25%      47226.870710
+50%      52768.688632
+75%      57649.153872
+max      83022.680873
+Name: Avg_monthly_household_cost, dtype: float64
+========
+
+========
+Will_vote_only_large_party:
+count     9921
+unique       3
+top         No
+freq      6532
+Name: Will_vote_only_large_party, dtype: object
+[('No', 6532), ('Yes', 1973), ('Maybe', 1416)]
+========
+
+========
+Phone_minutes_10_years:
+count      9815.000000
+mean     183809.259231
+std      113794.051178
+min           0.358876
+25%      100709.631544
+50%      163282.352020
+75%      232651.998060
+max      633632.790200
+Name: Phone_minutes_10_years, dtype: float64
+========
+
+========
+Avg_size_per_room:
+count    9807.000000
+mean       20.664140
+std         2.853591
+min         0.421475
+25%        19.531852
+50%        20.760123
+75%        22.093962
+max        27.359088
+Name: Avg_size_per_room, dtype: float64
+========
+
+========
+Weighted_education_rank:
+count    9811.000000
+mean      199.470968
+std       111.749863
+min         7.648880
+25%       117.454095
+50%       187.551630
+75%       256.612844
+max       735.397889
+Name: Weighted_education_rank, dtype: float64
+========
+
+========
+%_satisfaction_financial_policy:
+count    9823.000000
+mean       50.174525
+std        28.989028
+min         0.007796
+25%        24.576716
+50%        50.045569
+75%        75.505185
+max        99.999440
+Name: %_satisfaction_financial_policy, dtype: float64
+========
+
+========
+Avg_monthly_income_all_years:
+count      9816.000000
+mean      62848.373818
+std       99920.733598
+min           9.753030
+25%        5132.356374
+50%       19512.640035
+75%       72534.514570
+max      590618.605818
+Name: Avg_monthly_income_all_years, dtype: float64
+========
+
+========
+Last_school_grades:
+count    9805.000000
+mean       74.303927
+std        19.703986
+min        30.000000
+25%        60.000000
+50%        80.000000
+75%        90.000000
+max       100.000000
+Name: Last_school_grades, dtype: float64
+[(80.0, 1732), (90.0, 1717), (70.0, 1691)]
+========
+
+========
+Age_group:
+count         9909
+unique           3
+top       Below_30
+freq          3341
+Name: Age_group, dtype: object
+[('Below_30', 3341), ('30-45', 3307), ('45_and_up', 3261)]
+========
+
+========
+Number_of_differnt_parties_voted_for:
+count    9815.000000
+mean        2.002343
+std         1.248882
+min         0.000000
+25%         1.000000
+50%         2.000000
+75%         3.000000
+max         8.000000
+Name: Number_of_differnt_parties_voted_for, dtype: float64
+[(2.0, 3030), (1.0, 2578), (3.0, 2025)]
+========
+
+========
+Political_interest_Total_Score:
+count    9797.000000
+mean      671.209621
+std       121.194984
+min        49.792128
+25%       604.504739
+50%       669.837406
+75%       730.950512
+max      1035.490637
+Name: Political_interest_Total_Score, dtype: float64
+========
+
+========
+Number_of_valued_Kneset_members:
+count    9811.000000
+mean       10.167465
+std         2.767436
+min         5.000000
+25%         8.000000
+50%        10.000000
+75%        12.000000
+max        16.000000
+Name: Number_of_valued_Kneset_members, dtype: float64
+[(9.0, 1312), (10.0, 1140), (8.0, 1093)]
+========
+
+========
+Main_transportation:
+count                    9917
+unique                      4
+top       Motorcycle_or_truck
+freq                     2535
+Name: Main_transportation, dtype: object
+[('Motorcycle_or_truck', 2535), ('Foot_or_bicycle', 2518), ('Car', 2448)]
+========
+
+========
+Occupation:
+count                   9926
+unique                     5
+top       Services_or_Retail
+freq                    2026
+Name: Occupation, dtype: object
+[('Services_or_Retail', 2026), ('Student_or_Unemployed', 1994), ('Industry_or_other', 1980)]
+========
+
+========
+Overall_happiness_score:
+count    9764.000000
+mean      477.681779
+std       109.146813
+min         0.749414
+25%       416.156449
+50%       474.935356
+75%       536.050784
+max       776.379613
+Name: Overall_happiness_score, dtype: float64
+========
+
+========
+Num_of_kids_born_last_10_years:
+count    9823.000000
+mean        0.677186
+std         1.069436
+min         0.000000
+25%         0.000000
+50%         0.000000
+75%         1.000000
+max         9.000000
+Name: Num_of_kids_born_last_10_years, dtype: float64
+[(0.0, 5889), (1.0, 2319), (2.0, 965)]
+========
+
+========
+Financial_agenda_matters:
+count     9931
+unique       2
+top         No
+freq      4994
+Name: Financial_agenda_matters, dtype: object
+[('No', 4994), ('Yes', 4937), (nan, 69)]
+========
+
