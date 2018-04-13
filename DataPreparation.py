@@ -61,7 +61,7 @@ def rank_data_preparation(train_x, train_y, validate_x, validate_y):
                      metrics.accuracy_score(data_y[test_index], y_pred_SVM)))
 
 
-def test_data_preparation(train_x, train_y, test_x, test_y):
+def test_data_preparation(train_x, train_y, test_x, test_y, title):
     forest = RandomForestClassifier(n_estimators=3)
     forest = forest.fit(train_x, train_y)
     y_pred_RF = forest.predict(test_x)
@@ -71,6 +71,7 @@ def test_data_preparation(train_x, train_y, test_x, test_y):
     y_pred_SVM = clf.predict(test_x)
 
     # results
+    print(title)
     print("RF score: {0:.5}, SVM score: {1:.5}".
           format(metrics.accuracy_score(test_y, y_pred_RF),
                  metrics.accuracy_score(test_y, y_pred_SVM)))
@@ -193,11 +194,30 @@ def prepare_data():
 
 
 def test_results():
+    train = pd.read_csv('train_original.csv', header=0)
+    validate = pd.read_csv('validate_original.csv', header=0)
+    test = pd.read_csv('test_original.csv', header=0)
+    train, validate, test = most_basic_preparation(train, validate, test)
+    train_x, train_y = split_label(train)
+    test_x, test_y = split_label(test)
+    test_data_preparation(train_x, train_y, test_x, test_y, 'Basic')
+
     train = pd.read_csv('train.csv', header=0)
     test = pd.read_csv('test.csv', header=0)
     train_x, train_y = split_label(train)
     test_x, test_y = split_label(test)
-    test_data_preparation(train_x, train_y, test_x, test_y)
+    test_data_preparation(train_x, train_y, test_x, test_y, 'Advanced')
+
+
+def most_basic_preparation(train, validate, test):
+    train_x, _ = split_label(train)
+    object_features = train_x.select_dtypes(include='object').columns.values
+
+    train = train.drop(object_features, axis=1).dropna()
+    validate = validate.drop(object_features, axis=1).dropna()
+    test = test.drop(object_features, axis=1).dropna()
+
+    return train, validate, test
 
 
 if __name__ == '__main__':
