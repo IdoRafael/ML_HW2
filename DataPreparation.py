@@ -1,81 +1,18 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import sklearn
-from sklearn import metrics
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import KFold
-from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import mutual_info_classif
-import warnings
-warnings.filterwarnings("ignore", category=sklearn.exceptions.UndefinedMetricWarning)
-import os
+from ReadWrite import read_data, save_as_csv_original, save_as_csv
+
 
 LABEL_COLUMN = 'Vote'
-
-
-def read_data(online):
-    if online:
-        return pd.read_csv(
-            'https://webcourse.cs.technion.ac.il/236756/Spring2018/ho/WCFiles/ElectionsData.csv?7959',
-            header=0
-        )
-    else:
-        return pd.read_csv('ElectionsData.csv', header=0)
 
 
 def train_validate_test_split(dataframe):
     train_validate, test = train_test_split(dataframe, test_size=0.2)
     train, validate = train_test_split(train_validate, test_size=0.25)
     return train.copy(), validate.copy(), test.copy()
-
-
-def test_data_preparation(train_x, train_y, test_x, test_y, title):
-    forest = RandomForestClassifier(n_estimators=3)
-    forest = forest.fit(train_x, train_y)
-    y_pred_RF = forest.predict(test_x)
-
-    clf = SVC()
-    clf = clf.fit(train_x, train_y)
-    y_pred_SVM = clf.predict(test_x)
-
-    gbc = GradientBoostingClassifier()
-    gbc = gbc.fit(train_x, train_y)
-    y_pred_GBC = gbc.predict(test_x)
-
-    lr = LogisticRegression()
-    lr = lr.fit(train_x, train_y)
-    y_pred_LR = lr.predict(test_x)
-
-    # print results
-    print('{0:=^80}'.format(title))
-    table_metrics_print(
-        ['RF', 'SVM', 'GBC', 'LR'],
-        np.array([
-            get_metrics_list(test_y, y_pred_RF),
-            get_metrics_list(test_y, y_pred_SVM),
-            get_metrics_list(test_y, y_pred_GBC),
-            get_metrics_list(test_y, y_pred_LR)
-        ]).transpose()
-    )
-    print('{0:=^80}'.format(''))
-
-
-def table_metrics_print(header, data):
-    print(pd.DataFrame(data, ["Accuracy", "Precision", "Recall", "F1"], header))
-
-
-def get_metrics_list(y_true, y_pred):
-    return [
-        metrics.accuracy_score(y_true, y_pred),
-        metrics.precision_score(y_true, y_pred, average='weighted',),
-        metrics.recall_score(y_true, y_pred, average='weighted'),
-        metrics.f1_score(y_true, y_pred, average='weighted')
-    ]
 
 
 def handle_outliers(train, validate, test):
@@ -164,19 +101,6 @@ def handle_type_modification(train, validate, test):
     return train, validate, test
 
 
-def save_as_csv_original(train, validate, test):
-    train.to_csv("train_original.csv", index=False)
-    validate.to_csv("validate_original.csv", index=False)
-    test.to_csv("test_original.csv", index=False)
-
-
-def save_as_csv(train, validate, test):
-    # TODO ask about filenames expected
-    train.to_csv("train.csv", index=False)
-    validate.to_csv("validate.csv", index=False)
-    test.to_csv("test.csv", index=False)
-
-
 def prepare_data():
     df = read_data(online=False)
 
@@ -195,34 +119,5 @@ def prepare_data():
     save_as_csv(train, validate, test)
 
 
-def test_results():
-    train = pd.read_csv('train_original.csv', header=0)
-    validate = pd.read_csv('validate_original.csv', header=0)
-    test = pd.read_csv('test_original.csv', header=0)
-    train, validate, test = most_basic_preparation(train, validate, test)
-    train_x, train_y = split_label(train)
-    test_x, test_y = split_label(test)
-    test_data_preparation(train_x, train_y, test_x, test_y, 'Basic')
 
-    train = pd.read_csv('train.csv', header=0)
-    test = pd.read_csv('test.csv', header=0)
-    train_x, train_y = split_label(train)
-    test_x, test_y = split_label(test)
-    test_data_preparation(train_x, train_y, test_x, test_y, 'Advanced')
-
-
-def most_basic_preparation(train, validate, test):
-    train_x, _ = split_label(train)
-    object_features = train_x.select_dtypes(include='object').columns.values
-
-    train = train.drop(object_features, axis=1).dropna()
-    validate = validate.drop(object_features, axis=1).dropna()
-    test = test.drop(object_features, axis=1).dropna()
-
-    return train, validate, test
-
-
-if __name__ == '__main__':
-    prepare_data()
-    test_results()
 
