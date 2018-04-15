@@ -1,15 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import sklearn
 from sklearn import metrics
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import mutual_info_classif
-
+import warnings
+warnings.filterwarnings("ignore", category=sklearn.exceptions.UndefinedMetricWarning)
 import os
 
 LABEL_COLUMN = 'Vote'
@@ -31,36 +34,6 @@ def train_validate_test_split(dataframe):
     return train.copy(), validate.copy(), test.copy()
 
 
-def rank_data_preparation(train_x, train_y, validate_x, validate_y):
-    #TODO this is buggy atm
-    kf = KFold(n_splits=5)
-
-    data_x = pd.concat([train_x, validate_x])
-    data_y = pd.concat([train_y, validate_y])
-
-    for k, (train_index, test_index) in enumerate(kf.split(data_x)):
-        # Random Forest
-        # Create the random forest object which will include all the parameters
-        # for the fit
-        forest = RandomForestClassifier(n_estimators=3)
-        # Fit the training data to the Survived labels and create the decision trees
-        forest = forest.fit(data_x[train_index], data_y[train_index])
-        # output = forest.predict(test_data_noNaN)
-        y_pred_RF = forest.predict(data_x[test_index])
-
-        # SVM
-        # train a SVM classifier:
-        clf = SVC()
-        clf = clf.fit(data_x[train_index], data_y[train_index])
-        # output = clf.predict(test_data_noNaN)
-        y_pred_SVM = clf.predict(data_x[test_index])
-
-        # results
-        print("[fold {0}] RF score: {1:.5}, SVM score: {2:.5}".
-              format(k, metrics.accuracy_score(data_y[test_index], y_pred_RF),
-                     metrics.accuracy_score(data_y[test_index], y_pred_SVM)))
-
-
 def test_data_preparation(train_x, train_y, test_x, test_y, title):
     forest = RandomForestClassifier(n_estimators=3)
     forest = forest.fit(train_x, train_y)
@@ -70,11 +43,39 @@ def test_data_preparation(train_x, train_y, test_x, test_y, title):
     clf = clf.fit(train_x, train_y)
     y_pred_SVM = clf.predict(test_x)
 
-    # results
-    print(title)
-    print("RF score: {0:.5}, SVM score: {1:.5}".
-          format(metrics.accuracy_score(test_y, y_pred_RF),
-                 metrics.accuracy_score(test_y, y_pred_SVM)))
+    gbc = GradientBoostingClassifier()
+    gbc = gbc.fit(train_x, train_y)
+    y_pred_GBC = gbc.predict(test_x)
+
+    lr = LogisticRegression()
+    lr = lr.fit(train_x, train_y)
+    y_pred_LR = lr.predict(test_x)
+
+    # print results
+    print('{0:=^80}'.format(title))
+    table_metrics_print(
+        ['RF', 'SVM', 'GBC', 'LR'],
+        np.array([
+            get_metrics_list(test_y, y_pred_RF),
+            get_metrics_list(test_y, y_pred_SVM),
+            get_metrics_list(test_y, y_pred_GBC),
+            get_metrics_list(test_y, y_pred_LR)
+        ]).transpose()
+    )
+    print('{0:=^80}'.format(''))
+
+
+def table_metrics_print(header, data):
+    print(pd.DataFrame(data, ["Accuracy", "Precision", "Recall", "F1"], header))
+
+
+def get_metrics_list(y_true, y_pred):
+    return [
+        metrics.accuracy_score(y_true, y_pred),
+        metrics.precision_score(y_true, y_pred, average='weighted',),
+        metrics.recall_score(y_true, y_pred, average='weighted'),
+        metrics.f1_score(y_true, y_pred, average='weighted')
+    ]
 
 
 def handle_outliers(train, validate, test):
@@ -151,6 +152,7 @@ def identify_and_set_feature_type(dataframe):
 
 def handle_type_modification(train, validate, test):
     # TODO improve? Meaning turning non numeric types to numeric?
+    # improve ideas - ordered-keep as is. un ordered- dummy features?
     category_features = train.select_dtypes(include='category').columns.values
 
     for f in category_features:
@@ -223,10 +225,4 @@ def most_basic_preparation(train, validate, test):
 if __name__ == '__main__':
     prepare_data()
     test_results()
-
-
-
-
-
-
 
