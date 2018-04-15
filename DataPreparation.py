@@ -22,6 +22,8 @@ def handle_outliers(train, validate, test):
 
 def handle_imputation(train, validate, test):
     # TODO improve - currently imputes mode to categorical and mean to numerical
+    # TODO improve - Perhaps use median (for things like salary?)
+    # TODO improve - Perhaps use label based for training?
     category_features = train.select_dtypes(include='category').columns
 
     for f in train:
@@ -117,7 +119,3 @@ def prepare_data():
     train, validate, test = handle_feature_selection(train, validate, test)
 
     save_as_csv(train, validate, test)
-
-
-
-
