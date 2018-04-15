@@ -1,4 +1,6 @@
 import pandas as pd
+import scipy.stats as stats
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest
@@ -17,6 +19,13 @@ def train_validate_test_split(dataframe):
 
 def handle_outliers(train, validate, test):
     # TODO improve - currently ignore outliers
+    numerical_features = train.select_dtypes(include=np.number)
+    # replace outliers with null
+    for feature in numerical_features:
+        train.loc[(pd.np.abs(stats.zscore(train[feature])) > 3), feature] = pd.np.NaN
+        validate.loc[(pd.np.abs(stats.zscore(train[feature])) > 3), feature] = pd.np.NaN
+        test.loc[(pd.np.abs(stats.zscore(train[feature])) > 3), feature] = pd.np.NaN
+
     return train, validate, test
 
 
