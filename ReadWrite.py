@@ -25,3 +25,10 @@ def save_as_csv(train, validate, test):
     train.to_csv(FILES_DIR + "train.csv", index=False)
     validate.to_csv(FILES_DIR + "validate.csv", index=False)
     test.to_csv(FILES_DIR + "test.csv", index=False)
+
+
+def save_features_selected(original_features, new_features):
+    selected_features = [f for f in original_features if f in new_features]
+    with open(FILES_DIR + 'selected_features.txt', 'w') as file:
+        for f in selected_features:
+            file.write("%s\n" % f)

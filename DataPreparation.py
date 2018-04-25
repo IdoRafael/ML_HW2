@@ -1,12 +1,16 @@
 import pandas as pd
+import numpy as np
 import scipy.stats as stats
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.linear_model import LassoCV
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import SelectKBest, RFE, SelectFromModel
 from sklearn.feature_selection import mutual_info_classif
-from ReadWrite import read_data, save_as_csv_original, save_as_csv
+from sklearn.svm import LinearSVC
 
+from ReadWrite import read_data, save_as_csv_original, save_as_csv, save_features_selected
 
 LABEL_COLUMN = 'Vote'
 
@@ -18,15 +22,19 @@ def train_validate_test_split(dataframe):
 
 
 def handle_outliers(train, validate, test):
-    # TODO improve - currently ignore outliers
+    # TODO: Improve? per feature special treatment?
     numerical_features = train.select_dtypes(include=np.number)
-    # replace outliers with null
-    for feature in numerical_features:
-        train.loc[(pd.np.abs(stats.zscore(train[feature])) > 3), feature] = pd.np.NaN
-        validate.loc[(pd.np.abs(stats.zscore(train[feature])) > 3), feature] = pd.np.NaN
-        test.loc[(pd.np.abs(stats.zscore(train[feature])) > 3), feature] = pd.np.NaN
+
+    # ONLY IN TRAIN: replace outliers with null
+    for f in numerical_features:
+        train.loc[:, f] = train[f].copy().transform(lambda g: replace(g, 5))
 
     return train, validate, test
+
+
+def replace(group, stds):
+    group[np.abs(group - group.mean()) > stds * group.std()] = np.nan
+    return group
 
 
 def handle_imputation(train, validate, test):
@@ -65,55 +73,109 @@ def handle_scaling(train, validate, test):
     return train, validate, test
 
 
-def handle_feature_selection(train, validate, test):
-    # TODO improve - currently uses select k best, only using train data.
-    # TODO Pay attention to bonus assignment - asks to first use ALL data, then compare to only train
-    # TODO Pay attention to k=19. Try other k's?
+def scale_list(l):
+    return list(map(lambda x: x / max(l), l))
 
+
+def scale_reverse_list(l):
+    return list(map(lambda x: 1 - ((x - 1) / (max(l) - 1)), l))
+
+
+def handle_feature_selection(train, validate, test, k):
     train_x, train_y = split_label(train)
 
-    univariate_filter = SelectKBest(mutual_info_classif, k=19).fit(train_x, train_y)
+    #filter:
+    univariate_filter = SelectKBest(mutual_info_classif, k=k).fit(train_x, train_y)
 
-    train = transform(univariate_filter, train)
-    validate = transform(univariate_filter, validate)
-    test = transform(univariate_filter, test)
+    #wrapper:
+    rfe = RFE(LinearSVC(), k).fit(train_x, train_y)
+
+    #embedded:
+    sfmTree = SelectFromModel(ExtraTreesClassifier()).fit(train_x, train_y)
+
+    scores = np.array(scale_list(univariate_filter.scores_)) + \
+             np.array(scale_reverse_list(rfe.ranking_)) + \
+             np.array(scale_list(sfmTree.estimator_.feature_importances_))
+
+    best_features = np.array([x for _, x in sorted(zip(scores, train_x.columns.values), key=lambda pair: pair[0])])[
+                    -k:][::-1]
+
+    support = [(f in best_features) for f in train_x.columns.values]
+
+    train = transform(support, train)
+    validate = transform(support, validate)
+    test = transform(support, test)
 
     return train, validate, test
 
 
 def split_label(dataframe):
-    return dataframe.drop([LABEL_COLUMN], axis=1), dataframe.Vote
+    return dataframe.drop([LABEL_COLUMN], axis=1), dataframe[LABEL_COLUMN].astype('category').cat.codes
 
 
-def transform(selector, dataframe):
+def transform(support, dataframe):
     return dataframe[
-        (dataframe.drop([LABEL_COLUMN], axis=1).columns[selector.get_support()]).append(pd.Index([LABEL_COLUMN]))
+        (dataframe.drop([LABEL_COLUMN], axis=1).columns[support]).append(pd.Index([LABEL_COLUMN]))
     ]
 
 
 def identify_and_set_feature_type(dataframe):
-    object_features = dataframe.select_dtypes(include='object').columns
+    object_features = dataframe.select_dtypes(include=np.object).columns
 
     for f in object_features:
         dataframe[f] = dataframe[f].astype('category')
 
 
 def handle_type_modification(train, validate, test):
-    # TODO improve? Meaning turning non numeric types to numeric?
-    # improve ideas - ordered-keep as is. un ordered- dummy features?
-    category_features = train.select_dtypes(include='category').columns.values
+    object_features = train.select_dtypes(include='category').columns
 
-    for f in category_features:
-        if f != LABEL_COLUMN:
-            train[f] = train[f].cat.codes
-            validate[f] = validate[f].cat.codes
-            test[f] = test[f].cat.codes
+    unordered_categorical_features = [
+        'Most_Important_Issue', 'Main_transportation', 'Occupation'
+    ]
 
+    ordered_categorical_feature = [f for f in object_features if
+                                   f not in unordered_categorical_features and f != LABEL_COLUMN]
+
+    reorder_category_in_place([train, validate, test], 'Will_vote_only_large_party', ['No', 'Maybe', 'Yes'])
+    reorder_category_in_place([train, validate, test], 'Age_group', ['Below_30', '30-45', '45_and_up'])
+    
+    # Ordered Categorical Features - Use ordered encoding
+    for f in ordered_categorical_feature:
+        train[f], validate[f], test[f] = encode_using_codes(train, validate, test, f)
+    
+    # Unordered Categorical Features - Use One-Hot Encoding
+    for f in unordered_categorical_features:
+        train, validate, test = one_hot_encode_and_drop([train, validate, test], f)
+
+    return train, validate, test
+
+
+def reorder_category_in_place(dataframes, f, order):
+    for df in dataframes:
+        df[f].cat.reorder_categories(new_categories=order, inplace=True)
+
+
+def encode_using_codes(train, validate, test, f):
+    for df in [train, validate, test]:
+        yield df[f].cat.codes
+
+
+def one_hot_encode_and_drop(dataframes, f):
+    for df in dataframes:
+        yield pd.concat(
+            [df, pd.get_dummies(df[f]).rename(columns=lambda f_to_rename: f + '_' + f_to_rename)]
+            , axis=1
+        ).drop(f, axis=1)
+
+
+def handle_dimensionality_reduction(train, validate, test):
     return train, validate, test
 
 
 def prepare_data():
     df = read_data(online=False)
+
+    original_features = df.columns.values
 
     identify_and_set_feature_type(df)
 
@@ -125,6 +187,10 @@ def prepare_data():
     train, validate, test = handle_imputation(train, validate, test)
     train, validate, test = handle_type_modification(train, validate, test)
     train, validate, test = handle_scaling(train, validate, test)
-    train, validate, test = handle_feature_selection(train, validate, test)
+    train, validate, test = handle_feature_selection(train, validate, test, 19)
+
+    save_features_selected(original_features, train.columns.values)
+
+    train, validate, test = handle_dimensionality_reduction(train, validate, test)
 
     save_as_csv(train, validate, test)
