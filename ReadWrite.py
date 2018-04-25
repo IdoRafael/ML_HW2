@@ -2,6 +2,7 @@ import pandas as pd
 
 
 FILES_DIR = 'CSVFiles\\'
+LABEL_COLUMN = 'Vote'
 
 
 def read_data(online):
@@ -21,7 +22,6 @@ def save_as_csv_original(train, validate, test):
 
 
 def save_as_csv(train, validate, test):
-    # TODO ask about filenames expected
     train.to_csv(FILES_DIR + "train.csv", index=False)
     validate.to_csv(FILES_DIR + "validate.csv", index=False)
     test.to_csv(FILES_DIR + "test.csv", index=False)
@@ -29,6 +29,17 @@ def save_as_csv(train, validate, test):
 
 def save_features_selected(original_features, new_features):
     selected_features = [f for f in original_features if f in new_features]
+    new_selected_features = [f for f in new_features if f not in original_features]
+
     with open(FILES_DIR + 'selected_features.txt', 'w') as file:
+        file.write('Selected Features:\n')
         for f in selected_features:
-            file.write("%s\n" % f)
+            if f != LABEL_COLUMN:
+                file.write("%s\n" % f)
+
+        file.write('\n')
+
+        file.write('New Selected Features:\n')
+        for f in new_selected_features:
+            if f != LABEL_COLUMN:
+                file.write("%s\n" % f)

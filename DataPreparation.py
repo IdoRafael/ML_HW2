@@ -44,11 +44,12 @@ def handle_imputation(train, validate, test):
     category_features = train.select_dtypes(include='category').columns
 
     for f in train:
-        value = train[f].dropna().mode() if f in category_features else train[f].dropna().mean()
+        if f != LABEL_COLUMN:
+            value = train[f].dropna().mode().iloc[0] if f in category_features else train[f].dropna().mean()
 
-        impute(train, f, value)
-        impute(validate, f, value)
-        impute(test, f, value)
+            impute(train, f, value)
+            impute(validate, f, value)
+            impute(test, f, value)
 
     return train, validate, test
 
@@ -58,8 +59,6 @@ def impute(dataframe, f, value):
 
 
 def handle_scaling(train, validate, test):
-    # TODO improve - currently uses standard distribution scaler, only using train data.
-    # TODO Pay attention to bonus assignment - asks to first use ALL data, then compare to only train
     scaler = StandardScaler()
 
     non_label_features = train.keys()[train.columns.values != LABEL_COLUMN]
@@ -156,6 +155,7 @@ def reorder_category_in_place(dataframes, f, order):
 
 
 def encode_using_codes(train, validate, test, f):
+    # TODO USING OLD CODES! RENDERING IMPUTATION USELESS! FIX!
     for df in [train, validate, test]:
         yield df[f].cat.codes
 
