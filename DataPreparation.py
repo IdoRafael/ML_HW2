@@ -6,7 +6,7 @@ from sklearn.linear_model import LassoCV
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import SelectKBest, RFE, SelectFromModel
+from sklearn.feature_selection import SelectKBest, RFE, SelectFromModel, chi2
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.svm import LinearSVC
 
@@ -16,13 +16,12 @@ LABEL_COLUMN = 'Vote'
 
 
 def train_validate_test_split(dataframe):
-    train_validate, test = train_test_split(dataframe, test_size=0.2)
-    train, validate = train_test_split(train_validate, test_size=0.25)
+    train_validate, test = train_test_split(dataframe, test_size=0.1)
+    train, validate = train_test_split(train_validate, test_size=0.17)
     return train.copy(), validate.copy(), test.copy()
 
 
 def handle_outliers(train, validate, test):
-    # TODO: Improve? per feature special treatment?
     numerical_features = train.select_dtypes(include=np.number)
 
     # ONLY IN TRAIN: replace outliers with null
@@ -38,24 +37,40 @@ def replace(group, stds):
 
 
 def handle_imputation(train, validate, test):
-    # TODO improve - currently imputes mode to categorical and mean to numerical
-    # TODO improve - Perhaps use median (for things like salary?)
-    # TODO improve - Perhaps use label based for training?
     category_features = train.select_dtypes(include='category').columns
+
+    df = pd.concat([train, validate])
+
+    value_by = {
+        label: {
+            f: df[f][df[LABEL_COLUMN] == label].dropna().mode().iloc[0]
+            if f in category_features
+            else df[f][df[LABEL_COLUMN] == label].dropna().mean()
+            for f in df if f != LABEL_COLUMN
+        }
+        for label in df[LABEL_COLUMN].cat.categories.values
+    }
 
     for f in train:
         if f != LABEL_COLUMN:
-            value = train[f].dropna().mode().iloc[0] if f in category_features else train[f].dropna().mean()
+            value = df[f].dropna().mode().iloc[0] if f in category_features else df[f].dropna().mean()
 
-            impute(train, f, value)
-            impute(validate, f, value)
-            impute(test, f, value)
+            impute(test, f, lambda x: value)
+
+            for label in train[LABEL_COLUMN].cat.categories.values:
+                impute_by_label(train, f, lambda x: value_by[label][f], label)
+                impute_by_label(validate, f, lambda x: value_by[label][f], label)
 
     return train, validate, test
 
 
-def impute(dataframe, f, value):
-    dataframe.loc[dataframe[f].isnull(), f] = value
+def impute(df, f, transform):
+    df.loc[df[f].isnull(), f] = df[f][df[f].isnull()].transform(lambda x: transform(x))
+
+
+def impute_by_label(df, f, transform, label):
+    i = np.logical_and(df[f].isnull(), df[LABEL_COLUMN] == label)
+    df.loc[i, f] = df[f][i].transform(lambda x: transform(x))
 
 
 def handle_scaling(train, validate, test):
@@ -84,7 +99,7 @@ def handle_feature_selection(train, validate, test, k):
     train_x, train_y = split_label(train)
 
     #filter:
-    univariate_filter = SelectKBest(mutual_info_classif, k=k).fit(train_x, train_y)
+    univariate_filter_mi = SelectKBest(mutual_info_classif, k=k).fit(train_x, train_y)
 
     #wrapper:
     rfe = RFE(LinearSVC(), k).fit(train_x, train_y)
@@ -92,7 +107,7 @@ def handle_feature_selection(train, validate, test, k):
     #embedded:
     sfmTree = SelectFromModel(ExtraTreesClassifier()).fit(train_x, train_y)
 
-    scores = np.array(scale_list(univariate_filter.scores_)) + \
+    scores = np.array(scale_list(univariate_filter_mi.scores_)) + \
              np.array(scale_reverse_list(rfe.ranking_)) + \
              np.array(scale_list(sfmTree.estimator_.feature_importances_))
 
@@ -168,12 +183,8 @@ def one_hot_encode_and_drop(dataframes, f):
         ).drop(f, axis=1)
 
 
-def handle_dimensionality_reduction(train, validate, test):
-    return train, validate, test
-
-
 def prepare_data():
-    df = read_data(online=False)
+    df = read_data('ElectionsData.csv', online=True)
 
     original_features = df.columns.values
 
@@ -190,7 +201,4 @@ def prepare_data():
     train, validate, test = handle_feature_selection(train, validate, test, 19)
 
     save_features_selected(original_features, train.columns.values)
-
-    train, validate, test = handle_dimensionality_reduction(train, validate, test)
-
     save_as_csv(train, validate, test)

@@ -5,14 +5,14 @@ FILES_DIR = 'CSVFiles\\'
 LABEL_COLUMN = 'Vote'
 
 
-def read_data(online):
+def read_data(filename, online):
     if online:
         return pd.read_csv(
             'https://webcourse.cs.technion.ac.il/236756/Spring2018/ho/WCFiles/ElectionsData.csv?7959',
             header=0
         )
     else:
-        return pd.read_csv(FILES_DIR + 'ElectionsData.csv', header=0)
+        return pd.read_csv(FILES_DIR + filename, header=0)
 
 
 def save_as_csv_original(train, validate, test):
